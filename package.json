@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./backend",
-    "prod": "NODE_ENV=production nodemon ./backend"
+    "dev": "nodemon",
+    "prod": "NODE_ENV=production nodemon"
   },
   "repository": {
     "type": "git",
