@@ -2,7 +2,15 @@ const AppError = require('../utils/appError');
 
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
 
+const handleDuplicateFieldsDB = (err) => {
+  const message = `Duplicate field values: ${Object.keys(err.keyValue).join(
+    ', '
+  )}`;
+
+  console.log(err);
   return new AppError(message, 400);
 };
 
@@ -42,6 +50,10 @@ module.exports = (err, req, res, next) => {
 
     if (error.kind === 'ObjectId') {
       error = handleCastErrorDB(error);
+    }
+
+    if (error.code === 11000) {
+      error = handleDuplicateFieldsDB(error);
     }
     sendErrorProd(error, res);
   }
