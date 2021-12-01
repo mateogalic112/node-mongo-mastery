@@ -29,6 +29,10 @@ const sendErrorDev = (err, res) => {
   });
 };
 
+const handleJWTErrorDB = () => new AppError('JWT is invalid.', 401);
+
+const handleJWTExpiredError = () => new AppError('Token has expired.', 401);
+
 const sendErrorProd = (err, res) => {
   if (err.isOperational) {
     res.status(err.statusCode).json({
@@ -64,6 +68,14 @@ module.exports = (err, req, res, next) => {
 
     if (error._message === 'Validation failed') {
       error = handleValidationErrorDB(error);
+    }
+
+    if (error.name === 'JsonWebTokenError') {
+      error = handleJWTErrorDB();
+    }
+
+    if (error.name === 'TokenExpiredError') {
+      error = handleJWTExpiredError();
     }
 
     sendErrorProd(error, res);

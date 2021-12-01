@@ -1,3 +1,4 @@
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
@@ -14,6 +15,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    passwordChangedAt: req.body.passwordChangedAt,
   });
 
   const token = signToken(newUser._id);
@@ -63,6 +65,16 @@ exports.protect = catchAsync(async (req, res, next) => {
     return next(new AppError('No token found', 401));
   }
 
-  console.log(token);
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  const foundUser = await User.findById(decoded.id);
+  if (!foundUser) {
+    return next(new AppError('The user no longer exists', 401));
+  }
+
+  if (foundUser.changedPasswordAfter(decoded.iat)) {
+    return next(new AppError('User recently changed password.', 401));
+  }
+
   next();
 });
