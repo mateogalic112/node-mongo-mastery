@@ -58,6 +58,8 @@ module.exports = (err, req, res, next) => {
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
 
+    error.message = err.message;
+
     if (error.kind === 'ObjectId') {
       error = handleCastErrorDB(error);
     }
